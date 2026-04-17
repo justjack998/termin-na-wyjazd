@@ -3,33 +3,192 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wakacje 2026 – kto kiedy może</title>
+<title>Wypad nad jezioro 2026</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: sans-serif; padding: 2rem; background: #f4f4f0; color: #222; }
-  h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.4rem; }
-  #status { font-size: 12px; color: #888; margin-bottom: 1.5rem; }
-  #error { color: red; margin-bottom: 1rem; }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #a8d8ea 0%, #c9e8f0 40%, #e8f4e8 100%);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* SVG scenery */
+  .scenery {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 8rem;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .emoji-big {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a3a4a;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    color: #3a6a7a;
+    margin-top: 0.3rem;
+  }
+
+  #status {
+    font-size: 11px;
+    color: #5a8a9a;
+    margin-top: 0.5rem;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(30,80,100,0.12);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.9);
+  }
+
   .table-wrap { overflow-x: auto; }
-  table { border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
-  thead tr { background: #4a3296; color: white; }
-  th { padding: 10px 16px; font-size: 12px; font-weight: 500; white-space: nowrap; text-align: center; }
-  th.name-col { text-align: left; min-width: 120px; }
-  tbody tr:nth-child(even) { background: #fafafa; }
-  tbody tr:hover { background: #f0eeff; }
-  td { padding: 10px 16px; font-size: 14px; border-bottom: 1px solid #eee; text-align: center; }
-  td.name-col { text-align: left; font-weight: 500; color: #333; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  thead tr {
+    background: linear-gradient(90deg, #1a6e8a, #2a9d8f);
+    color: white;
+  }
+
+  th {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  th.name-col { text-align: left; min-width: 130px; }
+
+  tbody tr { transition: background 0.15s; }
+  tbody tr:nth-child(even) { background: rgba(168, 216, 234, 0.15); }
+  tbody tr:hover { background: rgba(42, 157, 143, 0.1); }
+
+  td {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(30,80,100,0.08);
+    text-align: center;
+  }
+
   tbody tr:last-child td { border-bottom: none; }
-  .yes { color: #2e7d32; font-size: 18px; }
-  .no { color: #ddd; font-size: 16px; }
+
+  td.name-col {
+    text-align: left;
+    font-weight: 600;
+    color: #1a3a4a;
+    font-size: 15px;
+  }
+
+  .yes {
+    color: #2a9d8f;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .no { color: #c8dde2; font-size: 15px; }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1.2rem;
+    font-size: 12px;
+    color: #3a6a7a;
+  }
+
+  .legend span { display: flex; align-items: center; gap: 5px; }
+
+  #error { color: #c0392b; text-align: center; padding: 1rem; }
 </style>
 </head>
 <body>
-<h1>Wakacje 2026 – kto kiedy może</h1>
-<div id="status">Ładowanie danych...</div>
-<div id="error"></div>
-<div class="table-wrap">
-  <div id="table-container"></div>
+
+<!-- Lake scenery SVG -->
+<svg class="scenery" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <!-- Sky reflection / water -->
+  <rect x="0" y="180" width="1440" height="140" fill="#7ec8d8" opacity="0.5"/>
+  <!-- Far treeline -->
+  <ellipse cx="100" cy="195" rx="70" ry="50" fill="#2d6a4f" opacity="0.6"/>
+  <ellipse cx="180" cy="185" rx="60" ry="55" fill="#40916c" opacity="0.7"/>
+  <ellipse cx="280" cy="200" rx="80" ry="45" fill="#2d6a4f" opacity="0.6"/>
+  <ellipse cx="420" cy="188" rx="90" ry="52" fill="#52b788" opacity="0.5"/>
+  <ellipse cx="560" cy="195" rx="75" ry="48" fill="#2d6a4f" opacity="0.65"/>
+  <ellipse cx="700" cy="185" rx="85" ry="55" fill="#40916c" opacity="0.6"/>
+  <ellipse cx="850" cy="198" rx="80" ry="46" fill="#2d6a4f" opacity="0.55"/>
+  <ellipse cx="1000" cy="187" rx="90" ry="53" fill="#52b788" opacity="0.6"/>
+  <ellipse cx="1150" cy="194" rx="75" ry="49" fill="#2d6a4f" opacity="0.65"/>
+  <ellipse cx="1300" cy="183" rx="85" ry="56" fill="#40916c" opacity="0.6"/>
+  <ellipse cx="1400" cy="197" rx="65" ry="47" fill="#2d6a4f" opacity="0.55"/>
+  <!-- Water surface -->
+  <path d="M0,210 Q360,195 720,210 Q1080,225 1440,210 L1440,320 L0,320 Z" fill="#5aadcc" opacity="0.55"/>
+  <path d="M0,230 Q360,215 720,230 Q1080,245 1440,230 L1440,320 L0,320 Z" fill="#3d9db8" opacity="0.4"/>
+  <!-- Water shimmer lines -->
+  <line x1="200" y1="240" x2="320" y2="240" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  <line x1="500" y1="255" x2="650" y2="255" stroke="white" stroke-width="1.5" opacity="0.3"/>
+  <line x1="900" y1="245" x2="1050" y2="245" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  <line x1="1200" y1="260" x2="1350" y2="260" stroke="white" stroke-width="1.5" opacity="0.3"/>
+  <!-- Little boat -->
+  <path d="M660,225 Q680,215 700,225 L695,235 L665,235 Z" fill="#e76f51" opacity="0.85"/>
+  <line x1="680" y1="215" x2="680" y2="200" stroke="#555" stroke-width="1.5" opacity="0.7"/>
+  <path d="M680,200 L695,210 L680,212 Z" fill="#e9c46a" opacity="0.85"/>
+</svg>
+
+<div class="content">
+  <div class="header">
+    <span class="emoji-big">🏕️</span>
+    <h1>Wypad nad jezioro 2026</h1>
+    <p class="subtitle">Kiedy komu pasuje wyjazd?</p>
+    <p id="status">Ładowanie danych...</p>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <div id="table-container"></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span style="color:#2a9d8f;font-weight:bold">✓</span> Pasuje</span>
+    <span><span style="color:#c8dde2">–</span> Nie pasuje</span>
+  </div>
+
+  <div id="error"></div>
 </div>
 
 <script>
@@ -62,19 +221,16 @@ async function load() {
     const res = await fetch(CSV_URL + "&t=" + Date.now());
     const text = await res.text();
     const rows = parseCSV(text);
-
     const headers = rows[0];
     const dateHeaders = headers.slice(1);
     const dataRows = rows.slice(1).filter(r => r[0]);
 
     let html = "<table><thead><tr><th class='name-col'>Osoba</th>";
-    dateHeaders.forEach(d => {
-      html += `<th>${formatDate(d)}</th>`;
-    });
+    dateHeaders.forEach(d => { html += `<th>${formatDate(d)}</th>`; });
     html += "</tr></thead><tbody>";
 
     dataRows.forEach(row => {
-      html += `<tr><td class="name-col">${row[0]}</td>`;
+      html += `<tr><td class="name-col">👤 ${row[0]}</td>`;
       for (let i = 1; i < headers.length; i++) {
         html += row[i] === "1"
           ? `<td class="yes">✓</td>`
@@ -88,7 +244,6 @@ async function load() {
     document.getElementById("status").textContent = `Ostatnia aktualizacja: ${new Date().toLocaleTimeString("pl-PL")}`;
   } catch (e) {
     document.getElementById("error").textContent = "Błąd: " + e.message;
-    document.getElementById("status").textContent = "";
   }
 }
 
