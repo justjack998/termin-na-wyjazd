@@ -10,24 +10,18 @@
   h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.4rem; }
   #status { font-size: 12px; color: #888; margin-bottom: 1.5rem; }
   #error { color: red; margin-bottom: 1rem; }
-
   .table-wrap { overflow-x: auto; }
-  table { border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); min-width: 600px; }
-
+  table { border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
   thead tr { background: #4a3296; color: white; }
   th { padding: 10px 16px; font-size: 12px; font-weight: 500; white-space: nowrap; text-align: center; }
   th.name-col { text-align: left; min-width: 120px; }
-
   tbody tr:nth-child(even) { background: #fafafa; }
   tbody tr:hover { background: #f0eeff; }
   td { padding: 10px 16px; font-size: 14px; border-bottom: 1px solid #eee; text-align: center; }
   td.name-col { text-align: left; font-weight: 500; color: #333; }
   tbody tr:last-child td { border-bottom: none; }
-
   .yes { color: #2e7d32; font-size: 18px; }
   .no { color: #ddd; font-size: 16px; }
-
-  .month-header { background: #6b52b8 !important; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.85; }
 </style>
 </head>
 <body>
@@ -43,25 +37,24 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuiduqlhiE5nhl
 
 const PL_MONTHS = ["Sty","Lut","Mar","Kwi","Maj","Cze","Lip","Sie","Wrz","Paź","Lis","Gru"];
 
+function formatDate(str) {
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.getDate() + " " + PL_MONTHS[d.getMonth()];
+}
+
 function parseCSV(text) {
-  const lines = text.trim().split("\n");
-  return lines.map(line => {
+  return text.trim().split("\n").map(line => {
     const cols = [];
     let cur = "", inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      if (line[i] === '"') { inQ = !inQ; }
-      else if (line[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
-      else { cur += line[i]; }
+    for (let ch of line) {
+      if (ch === '"') inQ = !inQ;
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+      else cur += ch;
     }
     cols.push(cur.trim());
     return cols;
   });
-}
-
-function formatDate(isoStr) {
-  const d = new Date(isoStr + "T00:00:00");
-  if (isNaN(d)) return isoStr;
-  return d.getDate() + " " + PL_MONTHS[d.getMonth()];
 }
 
 async function load() {
@@ -69,25 +62,24 @@ async function load() {
     const res = await fetch(CSV_URL + "&t=" + Date.now());
     const text = await res.text();
     const rows = parseCSV(text);
-    const data = rows.slice(1).filter(r => r[0] && r[1]);
 
-    const people = [...new Set(data.map(r => r[0]))].sort();
-    const dates = [...new Set(data.map(r => r[1]))].sort();
-    const lookup = new Set(data.map(r => r[0] + "|" + r[1]));
+    const headers = rows[0];
+    const dateHeaders = headers.slice(1);
+    const dataRows = rows.slice(1).filter(r => r[0]);
 
     let html = "<table><thead><tr><th class='name-col'>Osoba</th>";
-    dates.forEach(d => {
+    dateHeaders.forEach(d => {
       html += `<th>${formatDate(d)}</th>`;
     });
     html += "</tr></thead><tbody>";
 
-    people.forEach(person => {
-      html += `<tr><td class="name-col">${person}</td>`;
-      dates.forEach(d => {
-        html += lookup.has(person + "|" + d)
+    dataRows.forEach(row => {
+      html += `<tr><td class="name-col">${row[0]}</td>`;
+      for (let i = 1; i < headers.length; i++) {
+        html += row[i] === "1"
           ? `<td class="yes">✓</td>`
           : `<td class="no">–</td>`;
-      });
+      }
       html += "</tr>";
     });
 
@@ -95,7 +87,7 @@ async function load() {
     document.getElementById("table-container").innerHTML = html;
     document.getElementById("status").textContent = `Ostatnia aktualizacja: ${new Date().toLocaleTimeString("pl-PL")}`;
   } catch (e) {
-    document.getElementById("error").textContent = "Błąd ładowania: " + e.message;
+    document.getElementById("error").textContent = "Błąd: " + e.message;
     document.getElementById("status").textContent = "";
   }
 }
