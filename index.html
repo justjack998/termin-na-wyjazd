@@ -135,6 +135,51 @@
   .legend span { display: flex; align-items: center; gap: 5px; }
 
   #error { color: #c0392b; text-align: center; padding: 1rem; }
+
+  .winners-section {
+    margin-top: 2rem;
+  }
+
+  .winners-title {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a3a4a;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .winners-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .winner-chip {
+    background: linear-gradient(135deg, #2a9d8f, #1a6e8a);
+    color: white;
+    border-radius: 50px;
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(42,157,143,0.35);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .no-winners {
+    text-align: center;
+    color: #5a8a9a;
+    font-size: 14px;
+    padding: 1rem;
+    background: rgba(255,255,255,0.5);
+    border-radius: 12px;
+  }
 </style>
 </head>
 <body>
@@ -186,6 +231,11 @@
   <div class="legend">
     <span><span style="color:#2a9d8f;font-weight:bold">✓</span> Pasuje</span>
     <span><span style="color:#c8dde2">–</span> Nie pasuje</span>
+  </div>
+
+  <div class="winners-section">
+    <div class="winners-title">🏆 Terminy, które pasują wszystkim</div>
+    <div id="winners-container"></div>
   </div>
 
   <div id="error"></div>
@@ -242,6 +292,20 @@ async function load() {
     html += "</tbody></table>";
     document.getElementById("table-container").innerHTML = html;
     document.getElementById("status").textContent = `Ostatnia aktualizacja: ${new Date().toLocaleTimeString("pl-PL")}`;
+
+    // Winners: dates where everyone has "1"
+    const winners = [];
+    for (let i = 1; i < headers.length; i++) {
+      const allYes = dataRows.every(row => row[i] === "1");
+      if (allYes) winners.push(dateHeaders[i - 1]);
+    }
+
+    const wContainer = document.getElementById("winners-container");
+    if (winners.length === 0) {
+      wContainer.innerHTML = `<div class="no-winners">Brak terminu pasującego wszystkim… jeszcze 😅</div>`;
+    } else {
+      wContainer.innerHTML = `<div class="winners-grid">${winners.map(d => `<div class="winner-chip">🗓️ ${formatDate(d)}</div>`).join("")}</div>`;
+    }
   } catch (e) {
     document.getElementById("error").textContent = "Błąd: " + e.message;
   }
