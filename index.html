@@ -24,16 +24,34 @@
     position: relative;
   }
 
-  .scene-img {
+  .scene-wrap {
     position: fixed;
     bottom: 0; left: 0;
     width: 100%;
-    height: 300px;
-    object-fit: cover;
-    object-position: center bottom;
+    height: 520px;
     pointer-events: none;
     z-index: 0;
+  }
+
+  .scene-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+    display: block;
     image-rendering: pixelated;
+  }
+
+  .scene-fade {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 60%;
+    background: linear-gradient(to bottom,
+      #c8dff0 0%,
+      rgba(200,223,240,0.85) 25%,
+      rgba(220,210,170,0.5) 60%,
+      transparent 100%
+    );
   }
 
   .content {
@@ -213,7 +231,10 @@
 </head>
 <body>
 
-<img class="scene-img" src="Gemini_Generated_Image_w03jq2w03jq2w03j.png" alt="Pixel art lake campfire scene"/>
+<div class="scene-wrap">
+  <img class="scene-img" src="scene2.png" alt="Pixel art lake campfire scene"/>
+  <div class="scene-fade"></div>
+</div>
 
 <div class="content">
   <div class="header">
